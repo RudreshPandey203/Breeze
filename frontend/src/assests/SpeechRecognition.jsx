@@ -4,6 +4,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import { useState, useEffect } from "react";
 import FlowDiagram from "./FlowDiagram";
+import emailjs from "@emailjs/browser";
 
 const Dictaphone = () => {
   const {
@@ -49,6 +50,25 @@ const Dictaphone = () => {
 
       const data = await response.json(); // Parse response body as JSON
       setReqType(data.req);
+      if(data.req == 1){
+        emailjs.send("service_3jzzrvd","template_8omipe5",{
+            to_name: "Kumar Shivam",
+            message: "Hello automation working",
+            from_name: "Rudresh",
+            subject: "TEST",
+            reciever_email: "kumar.shivam2022@vitstudent.ac.in",
+            },{
+        publicKey: 'T-uXJUetQw84JsASr',
+      })
+      .then(
+        () => {
+          console.log('SUCCESS!');
+        },
+        (error) => {
+          console.log('FAILED...', error.text);
+        },
+      );
+      }
       console.log("Success:", data);
       setIsAutomating(true);
     } catch (error) {
@@ -190,11 +210,10 @@ const Dictaphone = () => {
             </div>
           )}
           {reqType === 1 && <div>mail commands automation</div>}
-          <FlowDiagram/>
+          <FlowDiagram />
         </div>
       )}
     </div>
   );
 };
 export default Dictaphone;
-
