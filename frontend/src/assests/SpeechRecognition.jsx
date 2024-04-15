@@ -3,6 +3,7 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import { useState, useEffect } from "react";
+import FlowDiagram from "./FlowDiagram";
 
 const Dictaphone = () => {
   const {
@@ -94,7 +95,7 @@ const Dictaphone = () => {
                       {" "}
                       <path
                         class="st0"
-                        d="M383.788,206.98v51.113c-0.013,35.266-14.301,67.108-37.475,90.318 c-23.212,23.176-55.042,37.464-90.307,37.464c-35.267,0-67.108-14.288-90.32-37.464c-23.174-23.211-37.462-55.052-37.474-90.318 V206.98H90.503v51.113c0.036,84.93,64.21,154.935,146.649,164.337V512h37.709v-89.57c82.426-9.402,146.599-79.407,146.636-164.337 V206.98H383.788z"
+                        d="M383.788,206.98v51.113c-0.013,35.266-14.301,67.108-37.475,90.318 c-23.212,23.176-55.042,37.464-90.307,37.464c-35.267,0-67.108-14.288-90.32-37.464c-23.174-23.211-37.462-55.052-37.474-90.318 V206.98H90.503v51.113c0.036style3,64.21,154.935,146.649,164.337V512h37.709v-89.57c82.426-9.402,146.599-79.407,146.636-164.337 V206.98H383.788z"
                       ></path>{" "}
                       <path
                         class="st0"
@@ -163,7 +164,7 @@ const Dictaphone = () => {
           )}
         </div>
       ) : (
-        <div className="bg-black h-screen w-screen absolute top-0 left-0 ">
+        <div className="bg-black min-h-screen w-screen absolute top-0 left-0 ">
           <div className="flex justify-end items-center p-2 cursor-pointer">
             <button onClick={abort} className="h-30 w-30 flex items-center">
               <h3 className="font-mono font-semibold text-xl animate-none">
@@ -189,6 +190,7 @@ const Dictaphone = () => {
             </div>
           )}
           {reqType === 1 && <div>mail commands automation</div>}
+          <FlowDiagram/>
         </div>
       )}
     </div>

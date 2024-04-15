@@ -4,6 +4,15 @@ from fastapi.responses import JSONResponse
 from fastapi import File, UploadFile
 from pydantic import BaseModel
 
+import time
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+from langchain.agents.openai_assistant import OpenAIAssistantRunnable
+from selection import classify,test
+
+classify("send a message to shraddha@gmail.com with subject hello and body hello")
+
 app = FastAPI()
 
 origins = [
@@ -34,6 +43,7 @@ async def upload_audio(audio_file: UploadFile = File(...)):
 async def transcript(message_in: MessageIn):
     print("hello")
     print(message_in.message) 
+    classify(message_in.message)
     print("hello print")
     request = 1
     return {"req": request}
