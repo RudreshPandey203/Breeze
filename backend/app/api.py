@@ -19,6 +19,10 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from langchain.agents.openai_assistant import OpenAIAssistantRunnable
 
+import imaplib
+import email
+from email.header import decode_header
+
 load_dotenv()
 api_key = os.environ['OPENAI_API_KEY']
 
@@ -80,7 +84,7 @@ def classify(input):
 def jsonSteps(input):
     json_convertor= client.beta.assistants.create(
         name="jsonwa",
-        instructions='''I will send you a process, and break it into steps corresponding to the text provided and return the steps in json format in an array. For example, if i ask you to send a mail to someone, you should write it like you are doing it by opening the mail of xyz@gmail.com in reference to text, typing the message, reviewing it , sending it etc. and return it in json format with variable name as steps. The steps should be in json format as like I have to directly pass it in api call json : {"1":"abc", "2":"abc"}. Send in raw text and strictly not in markdown text''',
+        instructions='''I will send you a process, and break it into steps corresponding to the text provided and return the steps in json format in an array. For example, if i ask you to send a mail to someone, you should write it like you are doing it by opening the mail of xyz@gmail.com in reference to text, typing the message, reviewing it , sending it etc. and return it in json format with variable name as steps. The steps should be in json format as like I have to directly pass it in api call json : {"abc", "abc"}. Send in raw text and strictly not in markdown text''',
         model="gpt-4-0125-preview",
         )
 
@@ -128,7 +132,7 @@ def jsonSteps(input):
 def jsonBody(input):
     json_convertor= client.beta.assistants.create(
         name="jsonwa",
-        instructions='''i ll send you a text about sending a mail to someone fetch the my name, name of receiver, emailid (in lower) , subject and body from the text and return it in a array with variable name as sender_name, reciever_name, body, subject, email. Send in raw text and strictly not in markdown text''',
+        instructions='''i ll send you a text about sending a mail to someone fetch the my name, name of receiver, emailid (in lower) , subject and body from the text and return it in a array with variable name as sender_name, reciever_name, body, subject, email in format {"sender_name":<sender-name>, "reciever_name":<reciever_name> (so and so )}. Send in raw text and strictly not in markdown text''',
         model="gpt-4-0125-preview",
         )
 
@@ -176,7 +180,7 @@ def jsonBody(input):
 def jsonKeyword(input):
     json_convertor= client.beta.assistants.create(
         name="jsonwa",
-        instructions='''I will send you the text about sorting the mail on some basis, find the keyword i am searching for and return it in a json form with variable name as keyword.''',
+        instructions='''I will send you the text about sorting the mail on some basis, find the keyword i am searching for and return it in a json form with variable name as keyword strictly in raw format as {"keyword":<keyword>} and not strictly not in markdown text.''',
         model="gpt-4-0125-preview",
         )
 
@@ -216,6 +220,7 @@ def jsonKeyword(input):
     # print("###################################################### \n")
     # print(f"USER: {message.content[0].text.value}")
     # print(f"ASSISTANT: {all_messages.data[0].content[0].text.value}")
+    print("key is getting returned as : ",all_messages.data[0].content[0].text.value)
     return all_messages.data[0].content[0].text.value
 
 #mail reader bot ends here
@@ -225,7 +230,7 @@ import email
 from email.header import decode_header
 
 # Function to decode email headers
-def mail_reader(input):
+def mail_fetch(input):
     def decode_subject(subject):
         decoded = decode_header(subject)[0][0]
         if isinstance(decoded, bytes):
@@ -236,9 +241,9 @@ def mail_reader(input):
     # IMAP server configuration
     IMAP_SERVER = 'imap.gmail.com'
     IMAP_PORT = 993
-    EMAIL_ADDRESS = 'bullaswami69@gmail.com'
-    PASSWORD = 'JYoTI@30903'
-    SEARCH_TEXT = input  # Text to search for in subject or body
+    EMAIL_ADDRESS = 'shraddha.mahapatra198@gmail.com'
+    PASSWORD = 'oyei zprw fzxu ffaj'
+    SEARCH_TEXT = input  # Text to search for in subject or sender
 
     # Connect to the IMAP server
     mail = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
@@ -249,38 +254,42 @@ def mail_reader(input):
     # Select the inbox
     mail.select('inbox')
 
-    # Fetch the last 100 emails
-    status, email_ids = mail.search(None, 'ALL', 'UTF-8')
-    email_ids = email_ids[0].split()
-    if len(email_ids) > 100:
-        email_ids = email_ids[-100:]
+    # Search for emails containing the keyword "exciting" in the body, name, or subject
+    status, email_ids = mail.search(None, f'(OR BODY "{SEARCH_TEXT}" FROM "{SEARCH_TEXT}" SUBJECT "{SEARCH_TEXT}")')
 
-    matching_emails = []
+    if status == 'OK':
+        email_ids = email_ids[0].split()
+        print("Number of Emails Found:", len(email_ids))  # Debugging statement
 
-    for email_id in email_ids:
-        # Fetch the email
-        status, email_data = mail.fetch(email_id, '(RFC822)')
-        
-        if status == 'OK':
-            raw_email = email_data[0][1]
-            msg = email.message_from_bytes(raw_email)
+        for email_id in email_ids:
+            # Fetch the email
+            status, email_data = mail.fetch(email_id, '(RFC822)')
+            print("Fetch Status:", status)  # Debugging statement
+            
+            if status == 'OK':
+                raw_email = email_data[0][1]
 
-            # Extract email subject and body
-            subject = decode_subject(msg['subject'])
-            body = ""
-            for part in msg.walk():
-                if part.get_content_type() == "text/plain":
-                    body += part.get_payload(decode=True).decode(part.get_content_charset(), 'ignore')
+                # Ensure raw_email is bytes
+                if isinstance(raw_email, bytes):
+                    # Parse the raw email
+                    msg = email.message_from_bytes(raw_email)
+                else:
+                    # Parse the raw email by encoding it to bytes
+                    msg = email.message_from_bytes(raw_email.encode('utf-8'))
 
-            # Check if SEARCH_TEXT is in subject or body
-            if SEARCH_TEXT.lower() in subject.lower() or SEARCH_TEXT.lower() in body.lower():
-                matching_emails.append({'Subject': subject, 'Body': body})
+                # Extract email headers
+                subject = decode_subject(msg['subject'])
+                sender = decode_header(msg['from'])[0][0]
+                date = msg['date']
+                
+                # Print email details
+                print(f"Subject: {subject}")
+                print(f"From: {sender}")
+                print(f"Date: {date}")
+                print()
 
     # Logout from the server
     mail.logout()
-    #mail reader
-
-    return matching_emails
 #mail reader ends here
 
 
@@ -318,20 +327,33 @@ async def transcript(message_in: MessageIn):
     print("Result code =", res)
     steps = jsonSteps(message_in.message)
     print(steps)
-    if res == '1':
-        print("mail format")
-        jsonres = jsonBody(message_in.message)
-        print(jsonres)
-        return {"req": res, "jsonres": jsonres, "steps": steps}
-    elif res == '2':
-        print("result fetch")
-        keyword = jsonKeyword(message_in.message)
-        print("keyword =", keyword)
-        jsonres = mail_reader(keyword)
-        print("Result =", jsonres)
-        return {"req": res, "jsonres": jsonres}
-    else:
-        return {"req": res}
+    return {"req":res, "steps":steps}
+@app.post("/sendmail")
+async def send_mail(message_in: MessageIn):
+    print("mail format")
+    jsonres = jsonBody(message_in.message)
+    print(jsonres)
+    return {"jsonres": jsonres}
+    # elif res == '2':
+    #     print("result fetch")
+    #     keyword = jsonKeyword(message_in.message)
+    #     print("keyword =", keyword)
+    #     jsonres = mail_reader(keyword)
+    #     print("Result =", jsonres)
+    #     return {"req": res, "jsonres": jsonres}
+    # else:
+    #     return {"req": res}
+
+@app.post("/fetchmail")
+async def fetch_mail(message_in:MessageIn):
+    print("mail fetch")
+    key = jsonKeyword(message_in.message)
+    print("hello")
+    key1 = json.loads(key)
+    key2 = key1["keyword"]
+    print(key2)
+    mail_fetch(key2)
+    return {"res":"ok"}
 
 
 @app.get("/abort")
