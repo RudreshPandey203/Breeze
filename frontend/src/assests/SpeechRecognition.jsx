@@ -25,6 +25,8 @@ const Dictaphone = () => {
   ];
   console.log(initialGraph);
 
+  const [formatedText, setFormatedText] = useState(true);
+
   const [graph, setGraph] = useState(initialGraph);
   const [text, setText] = useState("");
   const [graphVal, setGraphVal] = useState(false)
@@ -92,6 +94,7 @@ const Dictaphone = () => {
 
         const stepsArray = Object.values(steps);
         console.log(stepsArray);
+        
         setGraph(stepsArray);
 
         setGraphVal(true)
@@ -221,8 +224,11 @@ const Dictaphone = () => {
             )}
           </div>
           <h3 className="p-10 mx-auto flex-1 text-center text-xl font-mono font-semibold">
+            {transcript}..
+            <br/>
+            <br/>
             <input
-              className="bg-black"
+              className="bg-[#eeeded]"
               value={text}
               onChange={(e) => {
                 setText(e.target.value);
@@ -304,7 +310,7 @@ const Dictaphone = () => {
           )}
           {reqType === 3 && <div>Database automation</div>}
           <div className="flex text-center flex-col overflow-y-auto">
-            {graphVal && graph && graph.length>0 && graph[0].map((step, index) => (
+            {(graphVal && graph && graph.length>0 && formatedText) ? (graph[0].map((step, index) => (
               <div
                 className="flex flex-col justify-center items-center"
                 key={index}
@@ -327,7 +333,7 @@ const Dictaphone = () => {
                   </motion.div>
                 )}
               </div>
-            ))}
+            ))):<div><h2 className="bg-red-500">Graph couldnt be processed</h2></div>}
           </div>
 
           {/* {graph && (

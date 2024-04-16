@@ -46,7 +46,7 @@ function App() {
             ></path>{" "}
           </g>
         </svg>
-        <h1 className="px-3">Breazer</h1>
+        <h1 className="px-3">Breeze</h1>
       </header>
       <div className="flex p-5 justify-center">
         <div className="text-2xl text-gray-300 font-mono font-bold text-center">
