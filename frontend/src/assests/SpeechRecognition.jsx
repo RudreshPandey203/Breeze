@@ -27,6 +27,7 @@ const Dictaphone = () => {
 
   const [graph, setGraph] = useState(initialGraph);
   const [text, setText] = useState("");
+  const [graphVal, setGraphVal] = useState(false)
 
   // useEffect(() => {
   //   const timer = setInterval(() => {
@@ -70,6 +71,7 @@ const Dictaphone = () => {
         body: JSON.stringify({ message: message }),
       });
 
+
       if (!response.ok) {
         console.log(response);
         throw new Error("Network response was not ok");
@@ -77,20 +79,24 @@ const Dictaphone = () => {
 
       const data = await response.json(); // Parse response body as JSON
       setReqType(data.req);
-      if (data.req == 1) {
-        console.log("THE STEPS ARE : ",JSON.parse(data.steps));
+
+      console.log("THE STEPS ARE : ", JSON.parse(data.steps));
 
         const steps = JSON.parse(data.steps);
-        console.log("STEPS : ",steps);
-        console.log("HEEEELLLLL")
+        console.log("STEPS : ", steps);
+        console.log("HEEEELLLLL");
         for (let i = 0; i < steps.length; i++) {
-          console.log("i am working")
+          console.log("i am working");
           console.log(steps[i]);
         }
 
         const stepsArray = Object.values(steps);
         console.log(stepsArray);
         setGraph(stepsArray);
+
+        setGraphVal(true)
+
+      if (data.req == 1) {
 
         setTimeout(async () => {
           const response2 = await fetch("http://0.0.0.0:8000/sendmail", {
@@ -143,7 +149,7 @@ const Dictaphone = () => {
             );
         }, 5000);
       }
-      if(data.req == 2){
+      if (data.req == 2) {
         console.log(JSON.parse(data.steps));
 
         const steps = JSON.parse(data.steps);
@@ -156,20 +162,19 @@ const Dictaphone = () => {
         setGraph(stepsArray);
 
         const response2 = await fetch("http://0.0.0.0:8000/fetchmail", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ message: message }),
-          });
-          if (!response2.ok) {
-            console.log(response2);
-            throw new Error("Network response was not ok");
-          }
-          const data2 = await response2.json(); // Parse response body as JSON
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ message: message }),
+        });
+        if (!response2.ok) {
+          console.log(response2);
+          throw new Error("Network response was not ok");
+        }
+        const data2 = await response2.json(); // Parse response body as JSON
 
-          console.log("RESULT 2 : ", data2.res);
-
+        console.log("RESULT 2 : ", data2.res);
       }
       console.log("Success:", data);
       setIsAutomating(true);
@@ -260,12 +265,7 @@ const Dictaphone = () => {
               </div>
             </div>
           )}
-          {reqType === 1 && (
-            <div>
-              mail commands automation
-              
-            </div>
-          )}
+          {reqType === 1 && <div>mail commands automation</div>}
           {reqType === 2 && (
             <div>
               Fetch desired mails
@@ -303,7 +303,34 @@ const Dictaphone = () => {
             </div>
           )}
           {reqType === 3 && <div>Database automation</div>}
-          {graph && (
+          <div className="flex text-center flex-col overflow-y-auto">
+            {graphVal && graph && graph.length>0 && graph[0].map((step, index) => (
+              <div
+                className="flex flex-col justify-center items-center"
+                key={index}
+              >
+                <motion.div
+                  className="mx-auto bg-gradient-to-br from-pink-500 to-pink-600 text-2xl font-mono font-semibold rounded-lg flex  justify-center items-center px-10 py-8"
+                  initial={{ scale: 0 }}
+                  animate={{ rotate: 360, scale: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                  }}
+                >
+                  {step}
+                </motion.div>
+                {index < graph[0].length-1 && (
+                  <motion.div className="h-20 w-20">
+                    <img src="images/downArrow.svg" alt="down-arrow" />
+                  </motion.div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* {graph && (
                 <div className="flex text-center flex-col overflow-y-auto">
                   {graph.map((steps, index) => (
                     <div
@@ -330,7 +357,7 @@ const Dictaphone = () => {
                     </div>
                   ))}
                 </div>
-              )}
+              )} */}
           {/* {Array.isArray(graph) && graph.length > 0 && (
             <div className="flex text-center flex-col overflow-y-auto">
               {graph.map((step, index) => (
