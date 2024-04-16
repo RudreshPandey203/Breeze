@@ -5,6 +5,7 @@ import SpeechRecognition, {
 import { useState, useEffect } from "react";
 import FlowDiagram from "./FlowDiagram";
 import emailjs from "@emailjs/browser";
+import { motion } from "framer-motion";
 
 const Dictaphone = () => {
   const {
@@ -13,6 +14,19 @@ const Dictaphone = () => {
     resetTranscript,
     browserSupportsSpeechRecognition,
   } = useSpeechRecognition();
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [graph, setGraph] = useState([]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentStep((prevStep) =>
+        prevStep < graph.length - 1 ? prevStep + 1 : prevStep
+      );
+    }, 2000);
+
+    return () => clearInterval(timer); // cleanup on unmount
+  }, [graph]);
 
   const [isAutomating, setIsAutomating] = useState(false);
   const [reqType, setReqType] = useState(0);
@@ -50,24 +64,69 @@ const Dictaphone = () => {
 
       const data = await response.json(); // Parse response body as JSON
       setReqType(data.req);
-      if(data.req == 1){
-        emailjs.send("service_3jzzrvd","template_8omipe5",{
-            to_name: "Kumar Shivam",
-            message: "Hello automation working",
-            from_name: "Rudresh",
-            subject: "TEST",
-            reciever_email: "kumar.shivam2022@vitstudent.ac.in",
-            },{
-        publicKey: 'T-uXJUetQw84JsASr',
-      })
-      .then(
-        () => {
-          console.log('SUCCESS!');
-        },
-        (error) => {
-          console.log('FAILED...', error.text);
-        },
-      );
+      if (data.req == 1) {
+        console.log("json : ", data.jsonres);
+        console.log(data.jsonres.email);
+        console.log(data.jsonres.body);
+        console.log(data.jsonres.subject);
+        console.log(data.jsonres.sender_name);
+        console.log(data.jsonres.receiver_name);
+        const jsonData = JSON.parse(data.jsonres);
+        console.log(jsonData.email);
+        console.log(jsonData.body);
+        console.log(jsonData.subject);
+        console.log(jsonData.sender_name);
+        console.log(jsonData.receiver_name);
+
+        setGraph(JSON.parse(data.steps))
+
+        emailjs
+          .send(
+            "service_3jzzrvd",
+            "template_8omipe5",
+            {
+              to_name: jsonData.receiver_name,
+              message: jsonData.body,
+              from_name: jsonData.sender_name,
+              subject: jsonData.subject,
+              reciever_email: jsonData.email,
+            },
+            {
+              publicKey: "T-uXJUetQw84JsASr",
+            }
+          )
+          .then(
+            () => {
+              console.log("SUCCESS!");
+            },
+            (error) => {
+              console.log("FAILED...", error.text);
+            }
+          );
+        //     console.log("json : ",data.jsonres)
+        //     console.log(data.jsonres.email)
+        //     console.log(data.jsonres.body)
+        //     console.log(data.jsonres.subject)
+        //     console.log(data.jsonres.sender_name)
+        //     console.log(data.jsonres.receiver_name)
+
+        //     emailjs.send("service_3jzzrvd","template_8omipe5",{
+        //         to_name: data.jsonres.receiver_name,
+        //         message: data.jsonres.body,
+        //         from_name: data.jsonres.sender_name,
+        //         subject: data.jsonres.subject,
+        //         reciever_email: data.jsonres.email,
+        //         },{
+        //     publicKey: 'T-uXJUetQw84JsASr',
+        //   })
+        //   .then(
+        //     () => {
+        //       console.log('SUCCESS!');
+        //     },
+        //     (error) => {
+        //       console.log('FAILED...', error.text);
+        //     },
+        //   );
       }
       console.log("Success:", data);
       setIsAutomating(true);
@@ -210,7 +269,32 @@ const Dictaphone = () => {
             </div>
           )}
           {reqType === 1 && <div>mail commands automation</div>}
-          <FlowDiagram />
+          {graph[0]==!null && (<div className="flex text-center flex-col overflow-y-auto">
+            {graph.slice(0, currentStep + 1).map((step, index) => (
+              <div
+                className="flex flex-col justify-center items-center"
+                key={index}
+              >
+                <motion.div
+                  className="mx-auto bg-gradient-to-br from-pink-500 to-pink-600 text-2xl font-mono font-semibold rounded-lg flex justify-center items-center px-10 py-8"
+                  initial={{ scale: 0 }}
+                  animate={{ rotate: 360, scale: 1 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 260,
+                    damping: 20,
+                  }}
+                >
+                  {step}
+                </motion.div>
+                {index < currentStep && (
+                  <motion.div className="h-20 w-20">
+                    <img src="images/downArrow.svg" alt="down-arrow" />
+                  </motion.div>
+                )}
+              </div>
+            ))}
+          </div>)}
         </div>
       )}
     </div>
