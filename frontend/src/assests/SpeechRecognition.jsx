@@ -96,8 +96,8 @@ const Dictaphone = () => {
         console.log(stepsArray);
         
         setGraph(stepsArray);
-
-        setGraphVal(true)
+        setFormatedText(Array.isArray(stepsArray));
+        setGraphVal(true);
 
       if (data.req == 1) {
 
@@ -228,7 +228,7 @@ const Dictaphone = () => {
             <br/>
             <br/>
             <input
-              className="bg-[#eeeded]"
+              className="bg-[#eeeded] text-black"
               value={text}
               onChange={(e) => {
                 setText(e.target.value);

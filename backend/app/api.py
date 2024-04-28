@@ -391,8 +391,10 @@ def mail_fetch(input):
     # IMAP server configuration
     IMAP_SERVER = 'imap.gmail.com'
     IMAP_PORT = 993
-    EMAIL_ADDRESS = 'shraddha.mahapatra198@gmail.com'
-    PASSWORD = 'oyei zprw fzxu ffaj'
+    print(os.environ['Email'])
+    print(os.environ['Password'])
+    EMAIL_ADDRESS = os.environ['Email']
+    PASSWORD = os.environ['Password']
     SEARCH_TEXT = input  # Text to search for in subject or sender
 
     # Connect to the IMAP server
