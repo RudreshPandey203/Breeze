@@ -2,3 +2,4 @@ node modules
 venv
 projects
 .env
+env
